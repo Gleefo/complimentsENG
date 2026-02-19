@@ -42,16 +42,19 @@ p {
 
 #secretHeart {
   position: fixed;
-  bottom: 8px;
-  right: 8px;
-  font-size: 14px;
+  top: 20px;
+  right: 20px;
+  font-size: 16px;
   opacity: 0.15;
   text-decoration: none;
-  transition: 0.3s;
+  z-index: 9999;    
+  transition: 0.3s ease;
+  pointer-events: auto;
 }
 
 #secretHeart:hover {
   opacity: 1;
-  transform: scale(1.3);
+  transform: scale(1.4);
 }
+
 
