@@ -104,8 +104,29 @@ canvas.addEventListener("touchmove", e => {
   ctx.stroke();
 });
 
-canvas.addEventListener("touchend", () => {
+canvas.addEventListener("touchend", e => {
   drawing = false;
+
+  if (frozen) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.changedTouches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  if (tool === "text") {
+    const t = prompt("text:");
+    if (!t) return;
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "18px sans-serif";
+    ctx.fillText(t, x, y);
+  }
+
+  if (tool === "heart") {
+    ctx.font = "22px serif";
+    ctx.fillText("❤️", x, y);
+  }
 });
 
 
@@ -195,6 +216,34 @@ async function loadFromServer(){
   console.log("Loaded!");
   return data[0];
 }
+
+// =====================
+// TOUCH TAP SUPPORT (для текста и сердца)
+// =====================
+
+canvas.addEventListener("touchend", e => {
+  if (frozen) return;
+
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.changedTouches[0];
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  if (tool === "text") {
+    const t = prompt("text:");
+    if (!t) return;
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "18px sans-serif";
+    ctx.fillText(t, x, y);
+  }
+
+  if (tool === "heart") {
+    ctx.font = "22px serif";
+    ctx.fillText("❤️", x, y);
+  }
+});
+
 
 // =====================
 
