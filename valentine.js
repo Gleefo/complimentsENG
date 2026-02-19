@@ -8,6 +8,8 @@ const CARD_ID = "marlo_valentine_card";
 
 
 // =====================
+// ELEMENTS
+// =====================
 
 const canvas = document.getElementById("drawCanvas");
 const ctx = canvas.getContext("2d");
@@ -21,7 +23,9 @@ let drawing = false;
 let frozen = false;
 
 
-// ---------------------
+// =====================
+// CANVAS SIZE
+// =====================
 
 function resizeCanvas(){
   canvas.width = leftZone.clientWidth;
@@ -32,16 +36,18 @@ window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 
 
-// ---------------------
-// tools
+// =====================
+// TOOL BUTTONS
+// =====================
 
 document.getElementById("tool-pencil").onclick = () => tool = "pencil";
 document.getElementById("tool-text").onclick   = () => tool = "text";
 document.getElementById("tool-heart").onclick  = () => tool = "heart";
 
 
-// ---------------------
-// drawing
+// =====================
+// MOUSE SUPPORT
+// =====================
 
 canvas.addEventListener("mousedown", e => {
   if (frozen) return;
@@ -66,6 +72,23 @@ canvas.addEventListener("mousemove", e => {
 canvas.addEventListener("mouseup", () => drawing = false);
 canvas.addEventListener("mouseleave", () => drawing = false);
 
+canvas.addEventListener("click", e => {
+  if (frozen) return;
+
+  if (tool === "text"){
+    const t = prompt("text:");
+    if (!t) return;
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "18px sans-serif";
+    ctx.fillText(t, e.offsetX, e.offsetY);
+  }
+
+  if (tool === "heart"){
+    ctx.font = "22px serif";
+    ctx.fillText("❤️", e.offsetX, e.offsetY);
+  }
+});
 
 
 // =====================
@@ -75,7 +98,6 @@ canvas.addEventListener("mouseleave", () => drawing = false);
 canvas.addEventListener("touchstart", e => {
   if (frozen) return;
 
-  e.preventDefault();
   const touch = e.touches[0];
   const rect = canvas.getBoundingClientRect();
   const x = touch.clientX - rect.left;
@@ -86,12 +108,13 @@ canvas.addEventListener("touchstart", e => {
     ctx.beginPath();
     ctx.moveTo(x, y);
   }
+
+  e.preventDefault();
 });
 
 canvas.addEventListener("touchmove", e => {
   if (!drawing || frozen) return;
 
-  e.preventDefault();
   const touch = e.touches[0];
   const rect = canvas.getBoundingClientRect();
   const x = touch.clientX - rect.left;
@@ -102,17 +125,22 @@ canvas.addEventListener("touchmove", e => {
   ctx.strokeStyle = "#ffffff";
   ctx.lineTo(x, y);
   ctx.stroke();
+
+  e.preventDefault();
 });
 
 canvas.addEventListener("touchend", e => {
-  drawing = false;
-
   if (frozen) return;
 
-  const rect = canvas.getBoundingClientRect();
   const touch = e.changedTouches[0];
+  const rect = canvas.getBoundingClientRect();
   const x = touch.clientX - rect.left;
   const y = touch.clientY - rect.top;
+
+  if (tool === "pencil") {
+    drawing = false;
+    return;
+  }
 
   if (tool === "text") {
     const t = prompt("text:");
@@ -130,35 +158,11 @@ canvas.addEventListener("touchend", e => {
 });
 
 
-
-canvas.addEventListener("click", e => {
-
-  if (frozen) return;
-
-  if (tool === "text"){
-    const t = prompt("text:");
-    if(!t) return;
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "18px sans-serif";
-    ctx.fillText(t, e.offsetX, e.offsetY);
-  }
-
-  if (tool === "heart"){
-    ctx.font = "22px serif";
-    ctx.fillText("❤️", e.offsetX, e.offsetY);
-  }
-
-});
-
-
 // =====================
 // SUPABASE
 // =====================
 
 async function saveToServer(imageBase64) {
-
-  console.log("Saving...");
 
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/valentine_cards`,
@@ -179,16 +183,11 @@ async function saveToServer(imageBase64) {
 
   if (!res.ok) {
     const err = await res.text();
-    console.error("SAVE ERROR:", err);
     throw new Error(err);
   }
-
-  console.log("Saved!");
 }
 
 async function loadFromServer(){
-
-  console.log("Loading...");
 
   const res = await fetch(
     `${SUPABASE_URL}/rest/v1/valentine_cards?id=eq.${CARD_ID}&select=*`,
@@ -202,49 +201,18 @@ async function loadFromServer(){
 
   if (!res.ok) {
     const err = await res.text();
-    console.error("LOAD ERROR:", err);
     throw new Error(err);
   }
 
   const data = await res.json();
+  if (!data.length) return null;
 
-  if (!data.length) {
-    console.log("Nothing saved yet.");
-    return null;
-  }
-
-  console.log("Loaded!");
   return data[0];
 }
 
+
 // =====================
-// TOUCH TAP SUPPORT (для текста и сердца)
-// =====================
-
-canvas.addEventListener("touchend", e => {
-  if (frozen) return;
-
-  const rect = canvas.getBoundingClientRect();
-  const touch = e.changedTouches[0];
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
-
-  if (tool === "text") {
-    const t = prompt("text:");
-    if (!t) return;
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "18px sans-serif";
-    ctx.fillText(t, x, y);
-  }
-
-  if (tool === "heart") {
-    ctx.font = "22px serif";
-    ctx.fillText("❤️", x, y);
-  }
-});
-
-
+// SAVE BUTTON
 // =====================
 
 document.getElementById("saveForever").onclick = async () => {
@@ -257,13 +225,11 @@ document.getElementById("saveForever").onclick = async () => {
 
     await saveToServer(imgData);
 
-    // 🎵 
+    // 🎵 звук
     const sound = document.getElementById("valentineSound");
-    if (sound) {
-      sound.play();
-    }
+    if (sound) sound.play();
 
-    // 🎆
+    // 🎆 фейерверк
     confetti({
       particleCount: 150,
       spread: 80,
@@ -281,12 +247,11 @@ document.getElementById("saveForever").onclick = async () => {
   } catch(e) {
     alert("Save failed. Check console.");
   }
-
 };
 
 
-
-
+// =====================
+// SHOW SAVED
 // =====================
 
 function showSaved(payload){
@@ -309,20 +274,16 @@ function showSaved(payload){
 }
 
 
-
 // =====================
-// on load
+// AUTO LOAD
 // =====================
 
 (async function(){
-
   const saved = await loadFromServer();
-
-  if(!saved) return;
+  if (!saved) return;
 
   showSaved({
     image: saved.image,
     date: new Date(saved.created_at).toLocaleDateString()
   });
-
 })();
