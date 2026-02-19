@@ -255,7 +255,13 @@ document.getElementById("saveForever").onclick = async () => {
 
 function showSaved(payload){
 
+  document.getElementById("topHint").innerHTML = "our valentine <3";
   frozen = true;
+
+  const hint = document.getElementById("topHint");
+  hint.innerHTML = "our valentine <3";
+  hint.style.fontSize = "18px";
+  hint.style.opacity = "1";
 
   rightZone.style.display = "flex";
   toolsPanel.style.display = "none";
