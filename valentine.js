@@ -46,102 +46,41 @@ document.getElementById("tool-heart").onclick  = () => tool = "heart";
 
 
 // =====================
-// MOUSE SUPPORT
+// UNIVERSAL DRAW HELPERS
 // =====================
 
-canvas.addEventListener("mousedown", e => {
-  if (frozen) return;
+function getMousePos(e) {
+  return { x: e.offsetX, y: e.offsetY };
+}
 
-  if (tool === "pencil"){
-    drawing = true;
-    ctx.beginPath();
-    ctx.moveTo(e.offsetX, e.offsetY);
-  }
-});
-
-canvas.addEventListener("mousemove", e => {
-  if (!drawing || frozen) return;
-
-  ctx.lineWidth = 2;
-  ctx.lineCap = "round";
-  ctx.strokeStyle = "#ffffff";
-  ctx.lineTo(e.offsetX, e.offsetY);
-  ctx.stroke();
-});
-
-canvas.addEventListener("mouseup", () => drawing = false);
-canvas.addEventListener("mouseleave", () => drawing = false);
-
-canvas.addEventListener("click", e => {
-  if (frozen) return;
-
-  if (tool === "text"){
-    const t = prompt("text:");
-    if (!t) return;
-
-    ctx.fillStyle = "#fff";
-    ctx.font = "18px sans-serif";
-    ctx.fillText(t, e.offsetX, e.offsetY);
-  }
-
-  if (tool === "heart"){
-    ctx.font = "22px serif";
-    ctx.fillText("❤️", e.offsetX, e.offsetY);
-  }
-});
-
-
-// =====================
-// TOUCH SUPPORT
-// =====================
-
-canvas.addEventListener("touchstart", e => {
-  if (frozen) return;
-
-  const touch = e.touches[0];
+function getTouchPos(e) {
   const rect = canvas.getBoundingClientRect();
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
+  const touch = e.changedTouches[0] || e.touches[0];
+  return {
+    x: touch.clientX - rect.left,
+    y: touch.clientY - rect.top
+  };
+}
 
+function startDrawing(x, y) {
   if (tool === "pencil") {
     drawing = true;
     ctx.beginPath();
     ctx.moveTo(x, y);
   }
+}
 
-  e.preventDefault();
-});
-
-canvas.addEventListener("touchmove", e => {
-  if (!drawing || frozen) return;
-
-  const touch = e.touches[0];
-  const rect = canvas.getBoundingClientRect();
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
+function drawLine(x, y) {
+  if (!drawing || tool !== "pencil") return;
 
   ctx.lineWidth = 2;
   ctx.lineCap = "round";
   ctx.strokeStyle = "#ffffff";
   ctx.lineTo(x, y);
   ctx.stroke();
+}
 
-  e.preventDefault();
-});
-
-canvas.addEventListener("touchend", e => {
-  if (frozen) return;
-
-  const touch = e.changedTouches[0];
-  const rect = canvas.getBoundingClientRect();
-  const x = touch.clientX - rect.left;
-  const y = touch.clientY - rect.top;
-
-  if (tool === "pencil") {
-    drawing = false;
-    return;
-  }
-
+function placeElement(x, y) {
   if (tool === "text") {
     const t = prompt("text:");
     if (!t) return;
@@ -155,7 +94,70 @@ canvas.addEventListener("touchend", e => {
     ctx.font = "22px serif";
     ctx.fillText("❤️", x, y);
   }
+}
+
+
+// =====================
+// MOUSE EVENTS
+// =====================
+
+canvas.addEventListener("mousedown", e => {
+  if (frozen) return;
+  const { x, y } = getMousePos(e);
+  startDrawing(x, y);
 });
+
+canvas.addEventListener("mousemove", e => {
+  if (frozen) return;
+  const { x, y } = getMousePos(e);
+  drawLine(x, y);
+});
+
+canvas.addEventListener("mouseup", () => drawing = false);
+canvas.addEventListener("mouseleave", () => drawing = false);
+
+canvas.addEventListener("click", e => {
+  if (frozen) return;
+  if (tool === "pencil") return;
+
+  const { x, y } = getMousePos(e);
+  placeElement(x, y);
+});
+
+
+// =====================
+// TOUCH EVENTS
+// =====================
+
+canvas.addEventListener("touchstart", e => {
+  if (frozen) return;
+
+  const { x, y } = getTouchPos(e);
+  startDrawing(x, y);
+
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener("touchmove", e => {
+  if (frozen) return;
+
+  const { x, y } = getTouchPos(e);
+  drawLine(x, y);
+
+  e.preventDefault();
+}, { passive: false });
+
+canvas.addEventListener("touchend", e => {
+  if (frozen) return;
+
+  if (tool === "pencil") {
+    drawing = false;
+    return;
+  }
+
+  const { x, y } = getTouchPos(e);
+  placeElement(x, y);
+}, { passive: false });
 
 
 // =====================
@@ -222,14 +224,11 @@ document.getElementById("saveForever").onclick = async () => {
   try {
 
     const imgData = canvas.toDataURL();
-
     await saveToServer(imgData);
 
-    // 🎵 звук
     const sound = document.getElementById("valentineSound");
     if (sound) sound.play();
 
-    // 🎆 фейерверк
     confetti({
       particleCount: 150,
       spread: 80,
