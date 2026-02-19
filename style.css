@@ -40,3 +40,18 @@ p {
   text-align: center;
 }
 
+#secretHeart {
+  position: fixed;
+  bottom: 8px;
+  right: 8px;
+  font-size: 14px;
+  opacity: 0.15;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+#secretHeart:hover {
+  opacity: 1;
+  transform: scale(1.3);
+}
+

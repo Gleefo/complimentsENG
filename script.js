@@ -71,6 +71,11 @@ $(".header").text(compliment[com]);
 
 })
 
+if (buffer === secret) {
+  buffer = "";
+  window.location.href = "./valentine.html";
+}
+
 
 
 

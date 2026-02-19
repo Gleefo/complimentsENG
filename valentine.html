@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>valentine</title>
+
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="valentine.css">
+
+</head>
+<body class="valentine-body">
+
+<div class="top-hint">
+  you can draw anything here<br>
+  trace the shape
+</div>
+
+<div class="valentine-wrapper">
+
+  <div class="tools" id="toolsPanel">
+    <button id="tool-pencil">✏️</button>
+    <button id="tool-text">T</button>
+    <button id="tool-heart">❤️</button>
+
+    <button id="saveForever" class="save-btn">
+      save forever
+    </button>
+  </div>
+
+  <div class="canvas-zone">
+
+    <div class="left-zone">
+      <canvas id="drawCanvas"></canvas>
+      <img id="stencil" src="stencil.png">
+    </div>
+
+    <div class="right-zone" id="rightZone">
+      <img id="myHalf" src="my_half.png">
+      <div class="saved-date" id="savedDate"></div>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="valentine.js"></script>
+</body>
+</html>
