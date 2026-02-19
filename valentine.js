@@ -67,6 +67,49 @@ canvas.addEventListener("mouseup", () => drawing = false);
 canvas.addEventListener("mouseleave", () => drawing = false);
 
 
+
+// =====================
+// TOUCH SUPPORT
+// =====================
+
+canvas.addEventListener("touchstart", e => {
+  if (frozen) return;
+
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  if (tool === "pencil") {
+    drawing = true;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  }
+});
+
+canvas.addEventListener("touchmove", e => {
+  if (!drawing || frozen) return;
+
+  e.preventDefault();
+  const touch = e.touches[0];
+  const rect = canvas.getBoundingClientRect();
+  const x = touch.clientX - rect.left;
+  const y = touch.clientY - rect.top;
+
+  ctx.lineWidth = 2;
+  ctx.lineCap = "round";
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineTo(x, y);
+  ctx.stroke();
+});
+
+canvas.addEventListener("touchend", () => {
+  drawing = false;
+});
+
+
+
 canvas.addEventListener("click", e => {
 
   if (frozen) return;
@@ -165,6 +208,19 @@ document.getElementById("saveForever").onclick = async () => {
 
     await saveToServer(imgData);
 
+    // 🎵 
+    const sound = document.getElementById("valentineSound");
+    if (sound) {
+      sound.play();
+    }
+
+    // 🎆
+    confetti({
+      particleCount: 150,
+      spread: 80,
+      origin: { y: 0.6 }
+    });
+
     const saved = await loadFromServer();
     if (!saved) return;
 
@@ -178,6 +234,7 @@ document.getElementById("saveForever").onclick = async () => {
   }
 
 };
+
 
 
 
