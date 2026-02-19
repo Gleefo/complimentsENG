@@ -93,9 +93,6 @@ canvas {
 
 .tools {
   position: relative;
-  z-index: 10;
+  z-index: 1000;
 }
 
-#drawCanvas {
-  z-index: 1;
-}
