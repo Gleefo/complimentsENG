@@ -275,20 +275,8 @@ document.getElementById("saveForever").onclick = async () => {
 // SHOW SAVED
 // =====================
 
-function showSaved(payload){
+function showSaved(payload){ frozen = true; rightZone.style.display = "flex"; toolsPanel.style.display = "none"; document.getElementById("stencil").style.display = "none"; const img = new Image(); img.onload = () => { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height); }; img.src = payload.image; document.getElementById("savedDate").textContent = "saved on " + payload.date; }
 
-  frozen = true;
-
-  document.getElementById("topHint").innerHTML = "our valentine <3";
-
-  toolsPanel.style.display = "none";
-  document.getElementById("stencil").style.display = "none";
-
-  rightZone.style.display = "flex";
-
-  document.getElementById("savedDate").textContent =
-    "saved on " + payload.date;
-}
 
 
 
