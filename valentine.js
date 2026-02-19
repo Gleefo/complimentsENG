@@ -275,7 +275,38 @@ document.getElementById("saveForever").onclick = async () => {
 // SHOW SAVED
 // =====================
 
-function showSaved(payload){ frozen = true; rightZone.style.display = "flex"; toolsPanel.style.display = "none"; document.getElementById("stencil").style.display = "none"; const img = new Image(); img.onload = () => { ctx.clearRect(0,0,canvas.width,canvas.height); ctx.drawImage(img,0,0,canvas.width,canvas.height); }; img.src = payload.image; document.getElementById("savedDate").textContent = "saved on " + payload.date; }
+function showSaved(payload){
+
+  frozen = true;
+
+  rightZone.style.display = "flex";
+  toolsPanel.style.display = "none";
+  document.getElementById("stencil").style.display = "none";
+
+  const img = new Image();
+
+  img.crossOrigin = "anonymous";
+
+  img.onload = () => {
+    requestAnimationFrame(() => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+    });
+  };
+
+  img.onerror = (e) => {
+    console.error("Image failed to load:", e);
+  };
+
+  if (payload.image && payload.image.startsWith("data:image")) {
+    img.src = payload.image;
+  } else {
+    console.warn("Invalid image data from Supabase:", payload.image);
+  }
+
+  document.getElementById("savedDate").textContent =
+    "saved on " + payload.date;
+}
 
 
 
