@@ -90,3 +90,12 @@
 canvas {
   touch-action: none;
 }
+
+.tools {
+  position: relative;
+  z-index: 10;
+}
+
+#drawCanvas {
+  z-index: 1;
+}
