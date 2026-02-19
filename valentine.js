@@ -7,6 +7,8 @@ const SUPABASE_KEY = "sb_publishable_d_53Q37kQOmvN4Nzj0IptQ_BnP0bGKk";
 const CARD_ID = "marlo_valentine_card";
 
 
+
+
 // =====================
 // ELEMENTS
 // =====================
@@ -21,7 +23,7 @@ const toolsPanel = document.getElementById("toolsPanel");
 let tool = "pencil";
 let drawing = false;
 let frozen = false;
-
+let historyStack = [];
 
 // =====================
 // CANVAS SIZE
@@ -63,6 +65,7 @@ function getTouchPos(e) {
 }
 
 function startDrawing(x, y) {
+  saveState();
   if (tool === "pencil") {
     drawing = true;
     ctx.beginPath();
@@ -81,6 +84,7 @@ function drawLine(x, y) {
 }
 
 function placeElement(x, y) {
+  saveState();
   if (tool === "text") {
     const t = prompt("text:");
     if (!t) return;
@@ -95,6 +99,19 @@ function placeElement(x, y) {
     ctx.fillText("❤️", x, y);
   }
 }
+
+
+document.getElementById("tool-undo").onclick = () => {
+  if (historyStack.length === 0 || frozen) return;
+
+  const img = new Image();
+  img.src = historyStack.pop();
+
+  img.onload = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(img, 0, 0);
+  };
+};
 
 
 // =====================
@@ -123,6 +140,11 @@ canvas.addEventListener("click", e => {
   const { x, y } = getMousePos(e);
   placeElement(x, y);
 });
+
+
+function saveState() {
+  historyStack.push(canvas.toDataURL());
+}
 
 
 // =====================
@@ -255,28 +277,19 @@ document.getElementById("saveForever").onclick = async () => {
 
 function showSaved(payload){
 
-  document.getElementById("topHint").innerHTML = "our valentine <3";
   frozen = true;
 
-  const hint = document.getElementById("topHint");
-  hint.innerHTML = "our valentine <3";
-  hint.style.fontSize = "18px";
-  hint.style.opacity = "1";
+  document.getElementById("topHint").innerHTML = "our valentine <3";
 
-  rightZone.style.display = "flex";
   toolsPanel.style.display = "none";
   document.getElementById("stencil").style.display = "none";
 
-  const img = new Image();
-  img.onload = () => {
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    ctx.drawImage(img,0,0,canvas.width,canvas.height);
-  };
-  img.src = payload.image;
+  rightZone.style.display = "flex";
 
   document.getElementById("savedDate").textContent =
     "saved on " + payload.date;
 }
+
 
 
 // =====================
